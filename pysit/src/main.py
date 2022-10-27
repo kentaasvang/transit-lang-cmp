@@ -1,4 +1,5 @@
-#!./venv/bin/python
+#!../venv/bin/python
+
 import time 
 from dataclasses import dataclass
 from flask import Flask
@@ -12,11 +13,6 @@ FILES = {
     "TRIPS": "../../MBTA_GTFS/trips.txt",
     "STOP_FILES": "../../MBTA_GTFS/stop_times.txt"
 }
-
-
-@app.route("/schedules/<route_id>", methods=["GET"])
-def index(route_id):
-    return f"{load_trips()}"
 
 
 @dataclass
@@ -81,7 +77,7 @@ class GTFS:
             cells = line.split(",")
             route_id = cells[0]
             # trip_id, route_id, service_id
-            trips.append(Trip(cells[2], route_id, cells[1]))
+            trips.append((cells[2], route_id, cells[1]))
 
             if route_id in trips_ix_by_route:
                 trips_ix_by_route[route_id].append(i)
@@ -111,6 +107,7 @@ class GTFS:
             for line in lines[1:]:
                 cells = line.split(",")
                 trip_id = cells[0]
+                stop_times.append((trip_id, cells[3], cells[1], cells[2]))
 
                 if trip_id in stop_times_ix_by_trips:
                     stop_times_ix_by_trips[trip_id].append(i)
@@ -120,8 +117,16 @@ class GTFS:
                 i += 1
             
         end_time = time.time()
-        print(f"Elapsed time in seconds: {end_time-start_time}")
+        print(f"Elapsed time in seconds: {(end_time-start_time)*1000}")
         return (stop_times, stop_times_ix_by_trips)
+
+
+gtfs = GTFS()
+
+
+@app.route("/schedules/<route_id>", methods=["GET"])
+def index(route_id):
+    return gtfs.schedule_for_route(route_id)
 
 
 if __name__ == "__main__":
