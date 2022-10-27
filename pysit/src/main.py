@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 FILES = {
     "TRIPS": "../../MBTA_GTFS/trips.txt",
-    "STOP_TIMES": "../../MBTA_GTFS/stop_times.txt"
+    "STOP_FILES": "../../MBTA_GTFS/stop_times.txt"
 }
 
 
@@ -68,7 +68,33 @@ def load_stop_times():
     start_time = time.time()
     lines = ""
     with open(FILES["STOP_FILES"], "r") as stop_file:
-        pass
+        lines = stop_file.readlines()
+        header = lines[0].split(",")
+        assert header[0] == "trip_id"
+        assert header[1] == "arrival_time"
+        assert header[2] == "departure_time"
+        assert header[3] == "stop_id"
+
+        stop_times = []
+        stop_times_ix_by_trips = {}
+
+        i = 0
+        for line in lines[1:]:
+            cells = line.split(",")
+            trip_id = cells[0]
+
+            if trip_id in stop_times_ix_by_trips:
+                stop_times_ix_by_trips[trip_id].append(i)
+            else:
+                stop_times_ix_by_trips[trip_id] = [i]
+
+            i += 1
+        
+        end_time = time.time()
+        print(f"Elapsed time in seconds: {end_time-start_time}")
+        return (stop_times, stop_times_ix_by_trips)
+
+
     pass
 
 
