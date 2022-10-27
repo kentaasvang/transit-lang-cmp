@@ -8,3 +8,4 @@ trexit/_build
 trexit/deps
 trogsit/app
 trustit/target
+__pycache__/
