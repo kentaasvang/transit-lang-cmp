@@ -41,6 +41,7 @@ FILES = {
 }
 
 
+@dataclass
 class StopTime:
     def __init__(self, trip_id, arrival, departure, stop_id):
         self.trip_id = trip_id
@@ -49,6 +50,7 @@ class StopTime:
         self.stop_id = stop_id
 
 
+@dataclass
 class Trip:
     def __init__(self, trip_id, route_id, service_id):
         self.trip_id = trip_id
@@ -56,6 +58,7 @@ class Trip:
         self.service_id = service_id
 
 
+@dataclass
 class StopTimeResponse:
     def __init__(self, stop_id, arrival_time, departure_time):
         self.stop_id = stop_id
@@ -70,6 +73,7 @@ class StopTimeResponse:
         }
 
 
+@dataclass
 class TripResponse:
     def __init__(self, trip_id, route_id, service_id, schedules):
         self.trip_id = trip_id
