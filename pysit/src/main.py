@@ -1,5 +1,11 @@
 #!../venv/bin/python
 
+"""
+1st (naive implementation without data structures for stop-times and trips):
+    load_stop_times: 1889.3
+    req/sec:  1515requests (25.24/sec)
+"""
+
 import time 
 from dataclasses import dataclass
 from flask import Flask
@@ -31,7 +37,6 @@ class Trip:
 
 
 class GTFS:
-
     trips = []
     trips_ix_by_route = {}
     stop_times = []
@@ -47,13 +52,13 @@ class GTFS:
         if (trip_ixs != None):
             for trip_ix in trip_ixs:
                 trip = self.trips[trip_ix]
-                stop_time_ixs = self.stop_times_ix_by_trip[trip[0]]
+                stop_time_ixs = self.stop_times_ix_by_trip[trip.trip_id]
                 schedules = []
                 for stop_time_ix in stop_time_ixs:
                     stop_time = self.stop_times[stop_time_ix]
-                    schedules.append((stop_time[3], stop_time[1], stop_time[2]))
+                    schedules.append((stop_time.stop_id, stop_time.arrival, stop_time.departure))
 
-                trips.append((trip[2], trip[0], trip[1], schedules))
+                trips.append((trip.trip_id, trip.route_id, trip.service_id, schedules))
 
         return trips
 
@@ -76,8 +81,7 @@ class GTFS:
         for line in lines[1:]:
             cells = line.split(",")
             route_id = cells[0]
-            # trip_id, route_id, service_id
-            trips.append((cells[2], route_id, cells[1]))
+            trips.append(Trip(trip_id=cells[2], route_id=route_id, service_id=cells[1]))
 
             if route_id in trips_ix_by_route:
                 trips_ix_by_route[route_id].append(i)
@@ -107,7 +111,7 @@ class GTFS:
             for line in lines[1:]:
                 cells = line.split(",")
                 trip_id = cells[0]
-                stop_times.append((trip_id, cells[3], cells[1], cells[2]))
+                stop_times.append(StopTime( trip_id=trip_id, arrival=cells[1], departure=cells[2], stop_id=cells[3]))
 
                 if trip_id in stop_times_ix_by_trips:
                     stop_times_ix_by_trips[trip_id].append(i)
